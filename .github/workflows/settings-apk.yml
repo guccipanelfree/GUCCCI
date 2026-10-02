@@ -20,14 +20,14 @@ jobs:
         with:
           packages: 'platform-tools'
 
-      - name: Install Gradle
+      - name: Build APK
         run: |
           wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
           unzip -q gradle-8.2-bin.zip
-          echo "$PWD/gradle-8.2/bin" >> $GITHUB_PATH
+          export PATH="$PWD/gradle-8.2/bin:$PATH"
 
-      - name: Scaffold
-        run: |
+          rm -rf app build.gradle settings.gradle gradle.properties
+
           mkdir -p app/src/main/java/com/example/shtile
           mkdir -p app/src/main/res/drawable
           mkdir -p app/src/main/res/layout
@@ -247,9 +247,7 @@ jobs:
           import androidx.appcompat.app.AppCompatActivity
 
           class MainActivity : AppCompatActivity() {
-
               private lateinit var status: TextView
-
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
                   setContentView(R.layout.activity_main)
@@ -273,6 +271,62 @@ jobs:
           cat > app/src/main/res/layout/activity_main.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:padding="24dp"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+              <Button android:id="@+id/testSafeBtn"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="Gucci Normal"/>
+
+              <Button android:id="@+id/testBrutalBtn"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="8dp"
+                  android:text="Gucci Brutal"/>
+
+              <TextView android:id="@+id/status"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:paddingTop="16dp"
+                  android:typeface="monospace"
+                  android:textSize="12sp"/>
+          </LinearLayout>
+          EOF
+
+          cat > app/src/main/res/drawable/ic_tile_normal.xml <<'EOF'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="24dp" android:height="24dp"
+              android:viewportWidth="24" android:viewportHeight="24">
+              <path android:fillColor="#FFFFFFFF"
+                  android:pathData="M12,2L4,5v6c0,5.55 3.84,10.74 8,12 4.16,-1.26 8,-6.45 8,-12V5l-8,-3z"/>
+          </vector>
+          EOF
+
+          cat > app/src/main/res/drawable/ic_tile_brutal.xml <<'EOF'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="24dp" android:height="24dp"
+              android:viewportWidth="24" android:viewportHeight="24">
+              <path android:fillColor="#FFFFFFFF"
+                  android:pathData="M7,2v11h3v9l7,-12h-4l4,-8z"/>
+          </vector>
+          EOF
+
+          cat > app/src/main/res/values/strings.xml <<'EOF'
+          <resources><string name="app_name">Settings</string></resources>
+          EOF
+
+          gradle assembleDebug --no-daemon --stacktrace
+
+          ls -la app/build/outputs/apk/debug/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Settings-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: errorom/apk/res/android"
               android:orientation="vertical"
               android:padding="24dp"
               android:layout_width="match_parent"
